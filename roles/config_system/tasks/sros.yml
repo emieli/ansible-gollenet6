@@ -1,0 +1,10 @@
+---
+
+- name: system
+  sros_config:
+    src: sros.j2
+  register: output
+- name: changes performed
+  debug:
+    msg: "{{ output.commands }}"
+  when: output.commands is defined

@@ -1,0 +1,11 @@
+---
+
+- name: config_service
+  gather_facts: False
+  connection: local
+  hosts:
+    - PE
+    - AGG
+  roles:
+    - config_service
+    - config_save

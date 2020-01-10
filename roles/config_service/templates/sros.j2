@@ -1,0 +1,95 @@
+{# Remove VPLS #}
+{% if item.value.state == "absent" %}
+
+{# SAP #}
+{% if item.value.sap is defined %}
+{%  for sap in item.value.sap %}
+configure service {{ item.value.type }} {{ item.key }} sap {{ sap }} shutdown
+configure service {{ item.value.type }} {{ item.key }} no sap {{ sap }}
+{%  endfor %}
+{% endif%}
+
+{# SDP #}
+{% if item.value.sdp is defined %}
+{%  for sdp in item.value.sdp %}
+configure service {{ item.value.type }} {{ item.key }} mesh-sdp {{ sdp | regex_replace("PE", "") }}:{{ item.key }} shutdown
+configure service {{ item.value.type }} {{ item.key }} no mesh-sdp {{ sdp | regex_replace("PE", "") }}:{{ item.key }}
+{%  endfor %}
+{% endif%}
+
+configure service {{ item.value.type }} {{ item.key }} shutdown
+configure service no {{ item.value.type }} {{ item.key }}
+
+{% endif%}
+{# End of Remove Service #}
+
+{# Create VPLS #}
+{% if item.value.type == "vpls" %}
+{%  if item.value.state == "present" %}
+configure service {{ item.value.type }} {{ item.key }} customer 1 create no shutdown
+
+{# SAP #}
+{%   if item.value.sap is defined %}
+{%    for sap in item.value.sap %}
+configure service {{ item.value.type }} {{ item.key }} sap {{ sap }} create no shutdown
+{%    endfor %}
+{%   endif %}
+
+{# SDP #}
+{%   if item.value.sdp is defined %}
+{%    for sdp in item.value.sdp %}
+configure service sdp {{ sdp | regex_replace("PE", "") }} mpls create no shutdown
+configure service sdp {{ sdp | regex_replace("PE", "") }} far-end {{ hostvars[sdp]['router_id'] }}
+configure service sdp {{ sdp | regex_replace("PE", "") }} ldp
+configure service sdp {{ sdp | regex_replace("PE", "") }} path-mtu 1600
+configure service sdp {{ sdp | regex_replace("PE", "") }} no shutdown
+
+configure service {{ item.value.type }} {{ item.key }} mesh-sdp {{ sdp | regex_replace("PE", "") }}:{{ item.key }} create no shutdown
+{%    endfor %}
+{%   endif %}
+{%  endif %}
+{% endif %}
+
+{# Remove VPRN #}
+{% if item.value.type == "vprn" and item.value.state == "absent" %}
+
+{%  for interface in item.value.interface %}
+configure service {{ item.value.type }} {{ item.key }} interface "{{ interface.name }}" sap {{ interface.sap }} shutdown
+configure service {{ item.value.type }} {{ item.key }} interface "{{ interface.name }}" no sap {{ interface.sap }}
+configure service {{ item.value.type }} {{ item.key }} interface "{{ interface.name }}" shutdown
+configure service {{ item.value.type }} {{ item.key }} no interface "{{ interface.name }}"
+{%  endfor %}
+
+{%  if item.value.static_route is defined %}
+{%   for route in item.value.static_route %}
+configure service {{ item.value.type }} {{ item.key }} no static-route {{ route }}
+{%   endfor %}
+{%  endif %}
+
+configure service {{ item.value.type }} {{ item.key }} shutdown
+configure service no {{ item.value.type }} {{ item.key }}
+{% endif %}
+
+{# Create VPRN #}
+{% if item.value.type == "vprn" and item.value.state == "present" %}
+configure service {{ item.value.type }} {{ item.key }} customer 1 create no shutdown
+configure service {{ item.value.type }} {{ item.key }} autonomous-system {{ bgp.as }}
+configure service {{ item.value.type }} {{ item.key }} route-distinguisher {{ bgp.as }}:{{ item.key }}
+configure service {{ item.value.type }} {{ item.key }} vrf-target target:{{ bgp.as }}:{{ item.key }}
+configure service {{ item.value.type }} {{ item.key }} auto-bind-tunnel resolution filter
+configure service {{ item.value.type }} {{ item.key }} auto-bind-tunnel resolution-filter ldp
+
+{%  for interface in item.value.interface %}
+configure service {{ item.value.type }} {{ item.key }} interface "{{ interface.name }}" create no shutdown
+configure service {{ item.value.type }} {{ item.key }} interface "{{ interface.name }}" address {{ interface.address }}
+configure service {{ item.value.type }} {{ item.key }} interface "{{ interface.name }}" sap {{ interface.sap }} create no shutdown
+{%  endfor %}
+
+{%  if item.value.static_route is defined %}
+{%   for route in item.value.static_route %}
+configure service {{ item.value.type }} {{ item.key }} static-route {{ route }}
+{%   endfor %}
+{%  endif %}
+
+{% endif%}
+{# End of Create Service #}

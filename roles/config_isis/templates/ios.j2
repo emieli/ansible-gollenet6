@@ -1,0 +1,7 @@
+router isis core
+ net {{ isis.net_area }}.{{ router_id | replace('.', '') | hwaddr('cisco') }}.00
+ metric-style wide
+ no hello padding
+ log-adjacency-changes
+ mpls ldp sync
+ 

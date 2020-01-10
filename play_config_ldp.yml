@@ -1,0 +1,11 @@
+---
+
+- name: config_ldp
+  gather_facts: False
+  connection: local
+  hosts:
+    - P
+    - PE
+  roles:
+    - config_ldp
+    - config_save

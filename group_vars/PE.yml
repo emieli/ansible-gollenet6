@@ -1,0 +1,21 @@
+---
+
+ansible_connection:       network_cli
+ansible_user:             admin
+ansible_password:         admin
+ansible_network_os:       sros
+ansible_ssh_common_args:  '-oKexAlgorithms=diffie-hellman-group1-sha1'
+
+isis:
+  state: present
+  net_area:  49.0007
+  metric_crosslink: 15
+  metric_downlink:  1000
+  metric_uplink:    100
+
+ldp:
+  state: present
+
+bgp:
+  state: present
+  as: 7

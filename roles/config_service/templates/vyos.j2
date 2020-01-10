@@ -1,0 +1,12 @@
+{# AGG configuration #}
+
+{% if item.value.state == "absent" %}
+delete interfaces ethernet {{ item.value.uplink }} vif-s {{ item.key }}
+delete interfaces bridge br{{ item.key }}
+{% endif %}
+
+{% if item.value.state == "present" %}
+set interfaces ethernet {{ item.value.uplink }} vif-s {{ item.key }}
+set interfaces bridge br{{ item.key }} member interface {{ item.value.uplink }}.{{ item.key }}
+set interfaces bridge br{{ item.key }} member interface {{ item.value.access }}
+{% endif %}

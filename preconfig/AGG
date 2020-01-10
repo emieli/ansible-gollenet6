@@ -1,0 +1,6 @@
+configure
+set system host-name 'AGG20'
+set service ssh port '22'
+set interfaces ethernet eth0 address 'dhcp'
+commit
+save

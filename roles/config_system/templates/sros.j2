@@ -1,0 +1,16 @@
+configure card 1 card-type iom3-xp-b
+configure card 1 mda 1 mda-type m5-1gb-sfp-b
+configure system name "{{ inventory_hostname }}"
+
+{# loop through all port 1-5 and configure them:
+>>> range(1,6)
+[1, 2, 3, 4, 5]
+#}
+{% for i in range(1,6) %}
+configure port 1/1/{{ i }} ethernet mode hybrid
+configure port 1/1/{{ i }} ethernet encap-type qinq
+configure port 1/1/{{ i }} ethernet qinq-etype 0x88a8
+configure port 1/1/{{ i }} no shutdown
+{% endfor %}
+
+configure router Base interface "system" address {{ router_id }}/32

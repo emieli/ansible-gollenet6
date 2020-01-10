@@ -1,0 +1,9 @@
+configure router Base autonomous-system {{ bgp.as }}
+
+{# iBGP PE Mesh #}
+configure router Base bgp group "PE" peer-as {{ bgp.as }}
+configure router Base bgp group "PE" family vpn-ipv4
+configure router Base bgp group "PE" local-address {{ router_id }}
+{% for host in groups['PE'] if host != inventory_hostname %}
+configure router Base bgp group "PE" neighbor {{ hostvars[host]['router_id'] }} no shutdown
+{% endfor %}

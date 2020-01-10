@@ -1,0 +1,20 @@
+---
+
+- name: system
+  vyos_config:
+    src: vyos.j2
+  loop: "{{ services | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  register: output
+
+- set_fact: output_updates={{ output_updates | default([]) + item.commands }}
+  when: item.commands is defined
+  loop: "{{ output.results }}"
+  loop_control:
+    label: "{{ item.item.key }}"
+    
+- name: changes performed
+  debug:
+    msg: "{{ output_updates }}"
+  when: output_updates is defined

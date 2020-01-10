@@ -1,0 +1,24 @@
+# Prompt: Router>
+enable
+conf t
+!
+hostname P1
+!
+ip domain-name golle6.net
+crypto key generate rsa modulus 1024
+username admin1 privilege 15 password admin1
+ip ssh version 2
+no ip domain-lookup
+!
+int fa0/0
+ ip address dhcp
+ no cdp enable
+ no shut
+!
+line vty 0 4
+ logging synchronous
+ login local
+ transport input ssh
+exit
+!
+do write

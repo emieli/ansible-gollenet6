@@ -1,0 +1,16 @@
+---
+
+ansible_connection: network_cli
+ansible_network_os: ios
+ansible_user:       admin1
+ansible_password:   admin1
+
+isis:
+  state: present
+  net_area:  49.0007
+  metric_crosslink: 15
+  metric_downlink:  100
+  metric_uplink:    10
+
+ldp:
+  state: present
