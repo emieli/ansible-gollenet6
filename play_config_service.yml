@@ -5,6 +5,7 @@
   connection: local
   hosts:
     - PE
+    - PEER
     - AGG
   roles:
     - config_service

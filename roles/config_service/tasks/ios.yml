@@ -1,8 +1,8 @@
 ---
 
 - name: service
-  vyos_config:
-    src: vyos.j2
+  ios_config:
+    src: ios.j2
   loop: "{{ services | dict2items }}"
   loop_control:
     label: "{{ item.key }}"

@@ -1,6 +1,6 @@
 ---
 
-- name: system
+- name: service
   sros_config:
     src: sros.j2
   loop: "{{ services | dict2items }}"

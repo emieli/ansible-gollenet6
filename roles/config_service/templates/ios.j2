@@ -1,0 +1,23 @@
+vrf definition {{ item.key }}
+ rd {{ bgp.as }}:{{ item.key }}
+ route-target import {{ bgp.as }}:{{ item.key }}
+ route-target export {{ bgp.as }}:{{ item.key }}
+ address-family ipv4
+ address-family ipv6
+
+{% if item.value.interface is defined %}
+{%  for interface in item.value.interface %}
+interface {{ interface.interface }}
+ vrf forwarding {{ item.key }}
+ ip address {{ interface.ipv4 | ipaddr('address') }} {{ interface.ipv4 | ipaddr('netmask') }}
+ no shutdown
+{%  endfor %}
+{% endif %}
+
+{% if item.value.bgp is defined %}
+{%  for neighbor in item.value.bgp.neighbor %}
+router bgp {{ bgp.as }}
+ address-family {{ neighbor.type }} vrf {{ item.key }}
+  neighbor {{ neighbor.address }} remote-as {{ neighbor.as }}
+{%  endfor %}
+{% endif %}
