@@ -1,0 +1,30 @@
+router bgp {{ bgp.as }}
+ no bgp default ipv4-unicast
+
+{% for host in groups['PE'] %}
+router bgp {{ bgp.as }}
+ neighbor PE peer-group
+ neighbor PE remote-as {{ bgp.as }}
+ neighbor PE update-source Loopback0
+ neighbor {{ hostvars[host]['router_id'] }} peer-group PE
+ address-family vpnv4
+  neighbor {{ hostvars[host]['router_id'] }} activate
+ exit-address-family
+ address-family vpnv6
+  neighbor {{ hostvars[host]['router_id'] }} activate
+ exit-address-family
+{% endfor %}
+
+{% for host in groups['PEER'] if host != inventory_hostname %}
+router bgp {{ bgp.as }}
+ neighbor PEER peer-group
+ neighbor PEER remote-as {{ bgp.as }}
+ neighbor PEER update-source Loopback0
+ neighbor {{ hostvars[host]['router_id'] }} peer-group PEER
+ address-family vpnv4
+  neighbor {{ hostvars[host]['router_id'] }} activate
+ exit-address-family
+ address-family vpnv6
+  neighbor {{ hostvars[host]['router_id'] }} activate
+ exit-address-family
+{% endfor %}

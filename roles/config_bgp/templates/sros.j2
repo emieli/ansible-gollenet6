@@ -2,8 +2,16 @@ configure router Base autonomous-system {{ bgp.as }}
 
 {# iBGP PE Mesh #}
 configure router Base bgp group "PE" peer-as {{ bgp.as }}
-configure router Base bgp group "PE" family vpn-ipv4
+configure router Base bgp group "PE" family vpn-ipv4 vpn-ipv6
 configure router Base bgp group "PE" local-address {{ router_id }}
 {% for host in groups['PE'] if host != inventory_hostname %}
 configure router Base bgp group "PE" neighbor {{ hostvars[host]['router_id'] }} no shutdown
+{% endfor %}
+
+{# iBGP PEER Mesh #}
+configure router Base bgp group "PEER" peer-as {{ bgp.as }}
+configure router Base bgp group "PEER" family vpn-ipv4 vpn-ipv6
+configure router Base bgp group "PEER" local-address {{ router_id }}
+{% for host in groups['PEER'] %}
+configure router Base bgp group "PEER" neighbor {{ hostvars[host]['router_id'] }} no shutdown
 {% endfor %}

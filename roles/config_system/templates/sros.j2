@@ -1,6 +1,7 @@
 configure card 1 card-type iom3-xp-b
 configure card 1 mda 1 mda-type m5-1gb-sfp-b
 configure system name "{{ inventory_hostname }}"
+configure system chassis-mode d
 
 {# loop through all port 1-5 and configure them:
 >>> range(1,6)

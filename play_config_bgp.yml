@@ -5,6 +5,7 @@
   connection: local
   hosts:
     - PE
+    - PEER
   roles:
     - config_bgp
     - config_save

@@ -1,3 +1,6 @@
+ipv6 unicast-routing
+ipv6 cef
+
 vrf definition {{ item.key }}
  rd {{ bgp.as }}:{{ item.key }}
  route-target import {{ bgp.as }}:{{ item.key }}
@@ -9,7 +12,12 @@ vrf definition {{ item.key }}
 {%  for interface in item.value.interface %}
 interface {{ interface.interface }}
  vrf forwarding {{ item.key }}
+{%   if interface.ipv4 is defined %}
  ip address {{ interface.ipv4 | ipaddr('address') }} {{ interface.ipv4 | ipaddr('netmask') }}
+{%   endif %}
+{%   if interface.ipv6 is defined %}
+ ipv6 address {{ interface.ipv6 }}
+{%   endif %}
  no shutdown
 {%  endfor %}
 {% endif %}
