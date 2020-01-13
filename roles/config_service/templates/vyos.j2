@@ -1,12 +1,34 @@
 {# AGG configuration #}
 
 {% if item.value.state == "absent" %}
-delete interfaces ethernet {{ item.value.uplink }} vif-s {{ item.key }}
+delete interfaces ethernet {{ item.value.uplink }}
+delete interfaces ethernet {{ item.value.access }}
 delete interfaces bridge br{{ item.key }}
 {% endif %}
 
 {% if item.value.state == "present" %}
-set interfaces ethernet {{ item.value.uplink }} vif-s {{ item.key }}
-set interfaces bridge br{{ item.key }} member interface {{ item.value.uplink }}.{{ item.key }}
+
+{#  UPLINK #}
+{%  set interface = item.value.uplink.split('.') %}
+{%  if interface | length == 3 %}
+set interfaces ethernet {{ interface[0] }} vif-s {{ interface[1] }} vif-c {{ interface[2] }}
+{%  elif interface | length == 2 %}
+set interfaces ethernet {{ interface[0] }} vif-s {{ interface[1] }}
+{%  elif interface | length == 1 %}
+set interfaces ethernet {{ interface[0] }}
+{%  endif %}
+
+{#  ACCESS #}
+{%  set interface = item.value.access.split('.') %}
+{%  if interface | length == 3 %}
+set interfaces ethernet {{ interface[0] }} vif-s {{ interface[1] }} vif-c {{ interface[2] }}
+{%  elif interface | length == 2 %}
+set interfaces ethernet {{ interface[0] }} vif {{ interface[1] }}
+{%  elif interface | length == 1 %}
+set interfaces ethernet {{ interface[0] }}
+{%  endif %}
+
+set interfaces bridge br{{ item.key }} member interface {{ item.value.uplink }}
 set interfaces bridge br{{ item.key }} member interface {{ item.value.access }}
+
 {% endif %}
