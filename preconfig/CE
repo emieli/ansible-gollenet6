@@ -1,0 +1,13 @@
+ena
+conf t
+hostname C3001-3
+no cdp run
+int fa0/0
+no shut
+int fa0/0.100
+encapsulation dot1q 100
+ip address 7.3.12.3 255.255.255.254
+ip route 0.0.0.0 0.0.0.0 7.3.12.2
+int lo0
+ip address 10.3.0.1 255.255.0.0
+do write

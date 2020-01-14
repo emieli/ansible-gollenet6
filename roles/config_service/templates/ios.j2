@@ -22,10 +22,31 @@ interface {{ interface.interface }}
 {%  endfor %}
 {% endif %}
 
+{# BGP Neighbors #}
 {% if item.value.bgp is defined %}
 {%  for neighbor in item.value.bgp.neighbor %}
 router bgp {{ bgp.as }}
  address-family {{ neighbor.type }} vrf {{ item.key }}
   neighbor {{ neighbor.address }} remote-as {{ neighbor.as }}
+{%  endfor %}
+{% endif %}
+
+{# BGP Aggregate #}
+{% if item.value.bgp.aggregate is defined %}
+{%  for aggregate in item.value.bgp.aggregate %}
+router bgp {{ bgp.as }}
+ address-family {{ aggregate.type }} vrf {{ item.key }}
+ {% if aggregate.state == "absent" %}no{% endif %} aggregate-address {{ aggregate.prefix }}
+{%  endfor %}
+{% endif %}
+
+{# BGP Redistribute #}
+{% if item.value.bgp.redistribute is defined %}
+{%  for redistribute in item.value.bgp.redistribute %}
+router bgp {{ bgp.as }}
+ address-family ipv4 vrf {{ item.key }}
+  {% if redistribute.state == "absent" %}no{% endif %} redistribute {{ redistribute.type }}
+ address-family ipv6 vrf {{ item.key }}
+  {% if redistribute.state == "absent" %}no{% endif %} redistribute {{ redistribute.type }}
 {%  endfor %}
 {% endif %}

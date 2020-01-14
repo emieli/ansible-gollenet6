@@ -21,7 +21,7 @@ configure service {{ item.value.type }} {{ item.key }} shutdown
 configure service no {{ item.value.type }} {{ item.key }}
 
 {% endif%}
-{# End of Remove Service #}
+{# End Remove VPLS #}
 
 {# Create VPLS #}
 {% if item.value.type == "vpls" %}
@@ -43,22 +43,24 @@ configure service sdp {{ sdp | regex_replace("PE", "") }} far-end {{ hostvars[sd
 configure service sdp {{ sdp | regex_replace("PE", "") }} ldp
 configure service sdp {{ sdp | regex_replace("PE", "") }} path-mtu 1600
 configure service sdp {{ sdp | regex_replace("PE", "") }} no shutdown
-
 configure service {{ item.value.type }} {{ item.key }} mesh-sdp {{ sdp | regex_replace("PE", "") }}:{{ item.key }} create no shutdown
 {%    endfor %}
 {%   endif %}
 {%  endif %}
 {% endif %}
+{# End Create VPLS #}
 
 {# Remove VPRN #}
 {% if item.value.type == "vprn" and item.value.state == "absent" %}
 
-{%  for interface in item.value.interface %}
+{%  if item.value.interface is defined %}
+{%   for interface in item.value.interface %}
 configure service {{ item.value.type }} {{ item.key }} interface "{{ interface.name }}" sap {{ interface.sap }} shutdown
 configure service {{ item.value.type }} {{ item.key }} interface "{{ interface.name }}" no sap {{ interface.sap }}
 configure service {{ item.value.type }} {{ item.key }} interface "{{ interface.name }}" shutdown
 configure service {{ item.value.type }} {{ item.key }} no interface "{{ interface.name }}"
-{%  endfor %}
+{%   endfor %}
+{%  endif %}
 
 {%  if item.value.static_route is defined %}
 {%   for route in item.value.static_route %}
@@ -79,17 +81,25 @@ configure service {{ item.value.type }} {{ item.key }} vrf-target target:{{ bgp.
 configure service {{ item.value.type }} {{ item.key }} auto-bind-tunnel resolution filter
 configure service {{ item.value.type }} {{ item.key }} auto-bind-tunnel resolution-filter ldp
 
-{%  for interface in item.value.interface %}
+{%  if item.value.interface is defined %}
+{%   for interface in item.value.interface if interface.state == "absent" %}
+configure service {{ item.value.type }} {{ item.key }} interface "{{ interface.name }}" sap {{ interface.sap }} shutdown
+configure service {{ item.value.type }} {{ item.key }} interface "{{ interface.name }}" no sap {{ interface.sap }}
+configure service {{ item.value.type }} {{ item.key }} interface "{{ interface.name }}" shutdown
+configure service {{ item.value.type }} {{ item.key }} no interface "{{ interface.name }}"
+{%   endfor %}
+{%   for interface in item.value.interface if interface.state == "present" %}
 configure service {{ item.value.type }} {{ item.key }} interface "{{ interface.name }}" create no shutdown
 configure service {{ item.value.type }} {{ item.key }} interface "{{ interface.name }}" address {{ interface.address }}
 configure service {{ item.value.type }} {{ item.key }} interface "{{ interface.name }}" sap {{ interface.sap }} create no shutdown
-{%  endfor %}
+{%   endfor %}
+{%  endif %}
 
 {%  if item.value.static_route is defined %}
 {%   for route in item.value.static_route %}
-configure service {{ item.value.type }} {{ item.key }} static-route {{ route }}
+configure service {{ item.value.type }} {{ item.key }} {% if route.state == "absent" %}no{% endif %} static-route {{ route.prefix }}
 {%   endfor %}
 {%  endif %}
 
 {% endif%}
-{# End of Create Service #}
+{# End of Create VPRN #}
