@@ -1,5 +1,48 @@
+ip bgp-community new-format
+ip community-list standard CL_TRANSIT_OUT permit 7:100
+ip community-list standard CL_TRANSIT_OUT permit 7:200
+ip community-list standard CL_PEER_OUT permit 7:100
+ip community-list standard CL_PEER_OUT permit 7:200
+ip community-list standard CL_CUSTOMER_OUT permit 7:100
+ip community-list standard CL_CUSTOMER_OUT permit 7:200
+ip community-list standard CL_CUSTOMER_OUT permit 7:300
+ip community-list standard CL_CUSTOMER_OUT permit 7:400
+
+route-map RM_LOCAL_AS permit 10
+ set metric 100
+ set origin igp
+ set community 7:100
+
+route-map RM_PEER_IN permit 10
+ set metric 300
+ set origin igp
+ set community 7:300
+
+route-map RM_PEER_OUT permit 10
+ match community CL_PEER_OUT
+ 
+route-map RM_CUSTOMER_IN permit 10
+ set metric 200
+ set origin igp
+ set community 7:200
+
+route-map RM_CUSTOMER_OUT permit 10
+ match community CL_CUSTOMER_OUT
+
+route-map RM_TRANSIT_IN permit 10
+ set metric 400
+ set origin igp
+ set community 7:400
+
+route-map RM_TRANSIT_OUT permit 10
+ match community CL_TRANSIT_OUT
+
 router bgp {{ bgp.as }}
  no bgp default ipv4-unicast
+{# METRIC SYSTEM #}
+ bgp always-compare-med
+ bgp deterministic-med
+ bgp bestpath compare-routerid
 
 {% for host in groups['PE'] %}
 router bgp {{ bgp.as }}

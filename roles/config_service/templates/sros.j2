@@ -1,3 +1,11 @@
+{# Route-map #}
+configure router Base policy-options begin
+configure router Base policy-options policy-statement "RM_REDIST_CONNECTED" entry 10 from protocol direct
+configure router Base policy-options policy-statement "RM_REDIST_CONNECTED" entry 10 action accept community add 7:100      
+configure router Base policy-options policy-statement "RM_REDIST_CONNECTED" entry 10 action accept origin igp    
+configure router Base policy-options policy-statement "RM_REDIST_CONNECTED" entry 10 action accept metric set 100
+configure router Base policy-options commit
+
 {# Remove VPLS #}
 {% if item.value.state == "absent" %}
 

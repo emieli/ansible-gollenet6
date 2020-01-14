@@ -22,12 +22,28 @@ interface {{ interface.interface }}
 {%  endfor %}
 {% endif %}
 
-{# BGP Neighbors #}
+{# BGP Neighbors Remote AS #}
 {% if item.value.bgp is defined %}
 {%  for neighbor in item.value.bgp.neighbor %}
 router bgp {{ bgp.as }}
  address-family {{ neighbor.type }} vrf {{ item.key }}
   neighbor {{ neighbor.address }} remote-as {{ neighbor.as }}
+{%  endfor %}
+{% endif %}
+
+{# BGP Neighbors Route-map #}
+{% if item.value.bgp is defined %}
+{%  for neighbor in item.value.bgp.neighbor %}
+{%   if neighbor.route_map_in is defined %}
+router bgp {{ bgp.as }}
+ address-family {{ neighbor.type }} vrf {{ item.key }}
+  neighbor {{ neighbor.address }} route-map {{ neighbor.route_map_in }} in
+{%   endif %}
+{%   if neighbor.route_map_out is defined %}
+router bgp {{ bgp.as }}
+ address-family {{ neighbor.type }} vrf {{ item.key }}
+  neighbor {{ neighbor.address }} route-map {{ neighbor.route_map_out }} out
+{%   endif %}
 {%  endfor %}
 {% endif %}
 
